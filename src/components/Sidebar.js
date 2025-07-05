@@ -1,11 +1,15 @@
 import React from "react";
-
 import styled from "styled-components";
 import PropTypes from "prop-types";
 import { rgba } from "polished";
 import { Button, Fieldset, Legend } from "./FormElements";
 import InputSlider from "./InputSlider";
-import { defaultSliderValues, inputConfig } from "../utils/constants";
+import {
+  defaultSliderValues,
+  inputConfig,
+  headAccessories, // Import accessory options
+  handAccessories, // Import accessory options
+} from "../utils/constants";
 import { theme } from "../theme";
 
 const { gray1 } = theme.colors;
@@ -39,16 +43,25 @@ const Sidebar = ({ values, setValues, isExploded, setIsExploded }) => {
 
   const randomize = () => {
     setValues(
-      Object.entries(inputConfig).reduce(
-        (all, [key, { min, max }]) => ({
+      Object.entries(inputConfig).reduce((all, [key, config]) => {
+        let randomValue;
+        if (key === "expression") {
+          // Expression steps by 100, max 500 (0 to 5 options)
+          randomValue = Math.floor(getRandomNum(0, config.max / 100 + 1)) * 100;
+          if (randomValue > config.max) randomValue = config.max; // Ensure it doesn't exceed max
+        } else if (key === "headAccessory" || key === "handAccessory") {
+          // Accessories are indices from 0 to length-1
+          randomValue = Math.floor(getRandomNum(config.min, config.max + 1));
+          if (randomValue > config.max) randomValue = config.max; // Ensure not out of bounds
+        } else {
+          // Standard numeric range for HSL etc.
+          randomValue = getRandomNum(config.min, config.max);
+        }
+        return {
           ...all,
-          [key]:
-            key !== "expression"
-              ? getRandomNum(min, max)
-              : Math.ceil((getRandomNum(0, 5) * 100) / 100) * 100,
-        }),
-        values
-      )
+          [key]: Math.round(randomValue), // Round to nearest int for sliders
+        };
+      }, {}) // Start with an empty object to ensure all values are set fresh based on inputConfig
     );
   };
 
@@ -79,6 +92,33 @@ const Sidebar = ({ values, setValues, isExploded, setIsExploded }) => {
             onChange,
           }}
           label="Expression"
+        />
+      </Fieldset>
+
+      <Fieldset>
+        <Legend>Hand Accessory</Legend>
+        <InputSlider
+          id="handAccessory"
+          inputProps={{
+            ...inputConfig.handAccessory,
+            value: values.handAccessory,
+            onChange,
+          }}
+          label={handAccessories[values.handAccessory]?.name || "Accessory"}
+        />
+      </Fieldset>
+
+      <Fieldset>
+        <Legend>Head Accessory</Legend>
+        <InputSlider
+          id="headAccessory"
+          inputProps={{
+            ...inputConfig.headAccessory,
+            value: values.headAccessory,
+            onChange,
+          }}
+          // Display the name of the selected accessory
+          label={headAccessories[values.headAccessory]?.name || "Accessory"}
         />
       </Fieldset>
 
@@ -143,6 +183,68 @@ const Sidebar = ({ values, setValues, isExploded, setIsExploded }) => {
           label="Lightness"
         />
       </Fieldset>
+
+      <Fieldset>
+        <Legend>Background Gradient Start</Legend>
+        <InputSlider
+          id="bgGradientStartHue"
+          inputProps={{
+            ...inputConfig.bgGradientStartHue,
+            value: values.bgGradientStartHue,
+            onChange,
+          }}
+          label="Hue"
+        />
+        <InputSlider
+          id="bgGradientStartSaturation"
+          inputProps={{
+            ...inputConfig.bgGradientStartSaturation,
+            value: values.bgGradientStartSaturation,
+            onChange,
+          }}
+          label="Saturation"
+        />
+        <InputSlider
+          id="bgGradientStartLightness"
+          inputProps={{
+            ...inputConfig.bgGradientStartLightness,
+            value: values.bgGradientStartLightness,
+            onChange,
+          }}
+          label="Lightness"
+        />
+      </Fieldset>
+
+      <Fieldset>
+        <Legend>Background Gradient End</Legend>
+        <InputSlider
+          id="bgGradientEndHue"
+          inputProps={{
+            ...inputConfig.bgGradientEndHue,
+            value: values.bgGradientEndHue,
+            onChange,
+          }}
+          label="Hue"
+        />
+        <InputSlider
+          id="bgGradientEndSaturation"
+          inputProps={{
+            ...inputConfig.bgGradientEndSaturation,
+            value: values.bgGradientEndSaturation,
+            onChange,
+          }}
+          label="Saturation"
+        />
+        <InputSlider
+          id="bgGradientEndLightness"
+          inputProps={{
+            ...inputConfig.bgGradientEndLightness,
+            value: values.bgGradientEndLightness,
+            onChange,
+          }}
+          label="Lightness"
+        />
+      </Fieldset>
     </Controls>
   );
 };
@@ -156,6 +258,14 @@ Sidebar.propTypes = {
     lowerHue: PropTypes.number,
     lowerSaturation: PropTypes.number,
     lowerLightness: PropTypes.number,
+    headAccessory: PropTypes.number,
+    handAccessory: PropTypes.number,
+    bgGradientStartHue: PropTypes.number,
+    bgGradientStartSaturation: PropTypes.number,
+    bgGradientStartLightness: PropTypes.number,
+    bgGradientEndHue: PropTypes.number,
+    bgGradientEndSaturation: PropTypes.number,
+    bgGradientEndLightness: PropTypes.number,
   }),
   setValues: PropTypes.func.isRequired,
   isExploded: PropTypes.bool.isRequired,

@@ -5,18 +5,21 @@ import { defaultSliderValues } from "./utils/constants";
 
 const App = () => {
   const [values, setValues] = useState({
-    ...defaultSliderValues,
+    ...defaultSliderValues, // This now includes headAccessory, handAccessory, and bg gradients
   });
   const [isExploded, setIsExploded] = useState(false);
 
+  const appStyle = {
+    display: "flex",
+    justifyContent: "space-between",
+    height: "100vh",
+    background: `linear-gradient(to bottom right,
+      hsl(${values.bgGradientStartHue}, ${values.bgGradientStartSaturation}%, ${values.bgGradientStartLightness}%),
+      hsl(${values.bgGradientEndHue}, ${values.bgGradientEndSaturation}%, ${values.bgGradientEndLightness}%))`,
+  };
+
   return (
-    <main
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        height: "100vh",
-      }}
-    >
+    <main style={appStyle}>
       <MiniFig {...{ ...values, isExploded }} />
       <Sidebar {...{ values, setValues, isExploded, setIsExploded }} />
     </main>

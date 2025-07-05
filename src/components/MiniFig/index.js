@@ -4,6 +4,8 @@ import PropTypes from "prop-types";
 import { UpperBody, Torso, RightArm, LeftArm, Hand } from "./UpperBody";
 import { LowerBody, Waist, Crotch, LeftLeg, RightLeg } from "./LowerBody";
 import FACES, { Head, FacesWrap, Faces } from "./Faces";
+import { HEAD_ACCESSORIES } from "./HeadAccessories";
+import { headAccessories as headAccessoryOptions } from "../../utils/constants"; // Renamed for clarity
 
 const MiniFigure = styled.div`
   height: 485px;
@@ -28,7 +30,12 @@ const MiniFig = ({
   upperHue,
   upperSaturation,
   upperLightness,
+  headAccessory, // New prop
+  handAccessory, // New prop (will be passed to UpperBody)
 }) => {
+  const headAccessoryKey = headAccessoryOptions[headAccessory]?.key || "none";
+  const HeadAccessoryComponent = HEAD_ACCESSORIES[headAccessoryKey];
+
   return (
     <MiniFigure>
       <Head
@@ -37,6 +44,7 @@ const MiniFig = ({
           transform: `translate(-50%, ${isExploded ? "-8em" : 0})`,
         }}
       >
+        {HeadAccessoryComponent && <HeadAccessoryComponent />}
         <FacesWrap className="faces-wrap">
           <Faces
             className="faces"
@@ -56,6 +64,7 @@ const MiniFig = ({
         style={{
           color: `hsl(${upperHue},${upperSaturation}%,${upperLightness}%)`,
         }}
+        handAccessory={handAccessory} // Pass handAccessory prop
       >
         <Torso />
         <RightArm>
@@ -89,6 +98,8 @@ MiniFig.propTypes = {
   upperHue: PropTypes.number.isRequired,
   upperSaturation: PropTypes.number.isRequired,
   upperLightness: PropTypes.number.isRequired,
+  headAccessory: PropTypes.number.isRequired,
+  handAccessory: PropTypes.number.isRequired,
 };
 
 export default MiniFig;
